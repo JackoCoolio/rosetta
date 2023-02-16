@@ -1,0 +1,15 @@
+field_decl = { ident ~ " "+ ~ optional_ty ~ " "* ~ ","? }
+
+alpha = { 'a'..'z' | 'A'..'Z' | "_" }
+digit = { '0'..'9' }
+
+ident = { alpha ~ (alpha | digit)+ }
+
+optional_ty = { ty ~ optional }
+ty = { "string" | int_ty | float_ty | "bool" }
+float_size = { "32" | "64" }
+float_ty = { "f" ~ float_size }
+int_size = { "8" | "16" | "32" | "64" | "128" }
+int_sig = { "i" | "u" }
+int_ty = { int_sig ~ int_size }
+optional = { "?"? }
