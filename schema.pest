@@ -1,15 +1,36 @@
-field_decl = { ident ~ " "+ ~ optional_ty ~ " "* ~ ","? }
+file = { SOI ~ type_decl* ~ EOI }
+type_decl = _{ schema_decl | enum_decl }
 
-alpha = { 'a'..'z' | 'A'..'Z' | "_" }
-digit = { '0'..'9' }
+// enum_decl = { enum_decl_ident ~ ws* ~ enum_def }
+enum_decl = { ("enum ") ~ ident ~ ws* ~ enum_def }
+enum_def = { "{" ~ variant_decls? ~ field_decl_sep? ~ "}" }
 
-ident = { alpha ~ (alpha | digit)+ }
+variant_decls = _{ variant_decl ~ (field_decl_sep ~ variant_decl)* }
+variant_decl = { ident ~ (ws* ~ schema_def)? }
 
-optional_ty = { ty ~ optional }
-ty = { "string" | int_ty | float_ty | "bool" }
+schema_decl = { "schema" ~ ws+ ~ ident ~ ws* ~ schema_def }
+schema_def = { "{" ~ ws* ~ field_decls? ~ field_decl_sep? ~ ws* ~ "}" }
+
+// this is gross, but it's all i could think of for now
+field_decl_sep = _{ ((nle* ~ le ~ ","?) | (ws* ~ ",")) ~ ws* }
+field_decls = _{ field_decl ~ (field_decl_sep ~ field_decl)* }
+field_decl = { ident ~ " "+ ~ ty ~ optional? }
+
+alpha = _{ 'a'..'z' | 'A'..'Z' | "_" }
+digit = _{ '0'..'9' }
+
+ident = { alpha ~ (alpha | digit)* }
+
+ty = { "string" | int_ty | float_ty | "bool" | ident }
 float_size = { "32" | "64" }
 float_ty = { "f" ~ float_size }
 int_size = { "8" | "16" | "32" | "64" | "128" }
 int_sig = { "i" | "u" }
 int_ty = { int_sig ~ int_size }
-optional = { "?"? }
+optional = { "?" }
+
+ws = _{ le | nle }
+le = _{ "\n" | "\r\n" | "\r" }
+nle = _{ " " | "\t" }
+WHITESPACE = _{ ws }
+COMMENT = _{ "/*" ~ ( !"*/" ~ ANY )* ~ "*/" }
